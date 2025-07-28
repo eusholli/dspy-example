@@ -1,3 +1,9 @@
+---
+title: dspy-example
+app_file: gradio_interface.py
+sdk: gradio
+sdk_version: 5.38.2
+---
 # 🎬 DSPy Director Bake-Off: A Beginner's Guide to DSPy Programming
 
 Welcome to the **DSPy Director Bake-Off**! This project demonstrates core DSPy concepts through a fun, practical example: comparing how different movie directors would approach filming the same video idea.

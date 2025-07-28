@@ -5,205 +5,295 @@ import asyncio
 from director_bake_off import run_bake_off
 import traceback
 
-# Swedish-inspired color palette and styling
-SWEDISH_CSS = """
-/* Swedish Minimalist Design */
-:root {
-    --primary-white: #FFFFFF;
-    --soft-gray: #F5F5F5;
-    --muted-blue: #4A90A4;
-    --warm-beige: #E8DCC6;
-    --charcoal: #2C2C2C;
-    --light-blue: #E8F4F8;
-    --accent-gold: #D4AF37;
-    --success-green: #7FB069;
-    --border-gray: #E0E0E0;
+# Clean, professional light mode styling
+LIGHT_MODE_CSS = """
+/* Force light mode and override system preferences */
+* {
+    color-scheme: light !important;
 }
 
-/* Global styling */
+/* Override any dark mode media queries */
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: light !important;
+    }
+    
+    body, .gradio-container {
+        background: #ffffff !important;
+        color: #1f2937 !important;
+    }
+}
+
+/* Clean, professional styling */
 .gradio-container {
-    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-    background: linear-gradient(135deg, var(--soft-gray) 0%, var(--primary-white) 100%) !important;
-    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    background: #ffffff !important;
+    color: #1f2937 !important;
 }
 
 /* Header styling */
 .main-header {
     text-align: center;
     padding: 2rem 0;
-    background: var(--primary-white);
-    border-bottom: 1px solid var(--border-gray);
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
     margin-bottom: 2rem;
 }
 
 .main-title {
-    font-size: 2.5rem;
-    font-weight: 300;
-    color: var(--charcoal);
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #1f2937;
     margin-bottom: 0.5rem;
-    letter-spacing: -0.02em;
 }
 
 .main-subtitle {
-    font-size: 1.1rem;
-    color: var(--muted-blue);
+    font-size: 1.125rem;
+    color: #6b7280;
     font-weight: 400;
-    margin-bottom: 0;
 }
 
-/* Input section styling */
-.input-section {
-    background: var(--primary-white);
-    border-radius: 12px;
-    padding: 2rem;
-    box-shadow: 0 2px 20px rgba(0,0,0,0.05);
-    border: 1px solid var(--border-gray);
-    margin-bottom: 2rem;
+/* Force light backgrounds for ALL input containers and elements */
+.gr-textbox, .gr-textarea, input, textarea,
+.gr-textbox *, .gr-textarea *,
+.gr-textbox > div, .gr-textarea > div,
+.gradio-textbox, .gradio-textarea {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #1f2937 !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 6px !important;
 }
 
-.input-label {
-    font-size: 1rem;
-    font-weight: 500;
-    color: var(--charcoal);
-    margin-bottom: 0.5rem;
-    display: block;
+/* Force the container backgrounds to be light */
+.gr-textbox, .gr-textarea {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+}
+
+/* Force all child elements to have light backgrounds */
+.gr-textbox > *, .gr-textarea > *,
+.gr-textbox > div > *, .gr-textarea > div > * {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #1f2937 !important;
+}
+
+.gr-textbox:focus, .gr-textarea:focus, input:focus, textarea:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+    outline: none !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
 }
 
 /* Button styling */
 .submit-btn {
-    background: linear-gradient(135deg, var(--muted-blue) 0%, #5BA0B5 100%) !important;
+    background: #3b82f6 !important;
+    color: #ffffff !important;
     border: none !important;
-    border-radius: 8px !important;
-    padding: 12px 32px !important;
-    font-weight: 500 !important;
-    font-size: 1rem !important;
-    color: white !important;
-    transition: all 0.3s ease !important;
-    box-shadow: 0 4px 15px rgba(74, 144, 164, 0.3) !important;
+    border-radius: 6px !important;
+    padding: 0.75rem 1.5rem !important;
+    font-weight: 600 !important;
+    transition: background-color 0.2s !important;
 }
 
 .submit-btn:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 6px 25px rgba(74, 144, 164, 0.4) !important;
+    background: #2563eb !important;
 }
 
-/* Results section */
+/* Results styling */
 .results-container {
-    background: var(--primary-white);
-    border-radius: 12px;
-    padding: 2rem;
-    box-shadow: 0 2px 20px rgba(0,0,0,0.05);
-    border: 1px solid var(--border-gray);
-    margin-top: 2rem;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
 }
 
 .director-card {
-    background: var(--light-blue);
-    border-radius: 10px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
     padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    border-left: 4px solid var(--muted-blue);
-    transition: all 0.3s ease;
-}
-
-.director-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
 }
 
 .rank-badge {
     display: inline-block;
-    background: var(--accent-gold);
-    color: white;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.85rem;
+    background: #3b82f6;
+    color: #ffffff;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
 }
 
-.rank-1 { background: var(--accent-gold); }
-.rank-2 { background: #C0C0C0; }
-.rank-3 { background: #CD7F32; }
+.rank-1 { background: #f59e0b; }
+.rank-2 { background: #6b7280; }
+.rank-3 { background: #d97706; }
 
 .director-name {
-    font-size: 1.3rem;
+    font-size: 1.25rem;
     font-weight: 600;
-    color: var(--charcoal);
+    color: #1f2937;
     margin-bottom: 1rem;
 }
 
 .prompt-text {
-    font-size: 1rem;
-    line-height: 1.6;
-    color: var(--charcoal);
-    background: var(--primary-white);
+    background: #ffffff;
+    color: #1f2937;
     padding: 1rem;
-    border-radius: 8px;
-    border: 1px solid var(--border-gray);
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    line-height: 1.6;
     margin-bottom: 1rem;
 }
 
 .additional-director {
-    background: var(--warm-beige);
-    border-radius: 10px;
+    background: #ecfdf5;
+    border: 1px solid #d1fae5;
+    border-radius: 8px;
     padding: 1.5rem;
-    margin-bottom: 2rem;
-    border-left: 4px solid var(--success-green);
+    margin-bottom: 1.5rem;
 }
 
 .explanation-section {
-    background: var(--soft-gray);
-    border-radius: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
     padding: 1.5rem;
-    margin-top: 2rem;
-    border-left: 4px solid var(--muted-blue);
+    margin-top: 1.5rem;
 }
 
 .section-title {
-    font-size: 1.2rem;
+    font-size: 1.125rem;
     font-weight: 600;
-    color: var(--charcoal);
+    color: #1f2937;
     margin-bottom: 1rem;
 }
 
-/* Loading animation */
 .loading {
     text-align: center;
     padding: 2rem;
-    color: var(--muted-blue);
+    color: #6b7280;
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
-    .main-title {
-        font-size: 2rem;
-    }
-    
-    .input-section, .results-container {
-        padding: 1.5rem;
-        margin: 1rem;
-    }
-    
-    .director-card {
-        padding: 1rem;
-    }
+/* Ensure all Gradio components use light mode */
+.gr-block, .gr-form, .gr-box {
+    background: #ffffff !important;
+    color: #1f2937 !important;
 }
 
-/* Custom textbox styling */
-.gr-textbox {
-    border-radius: 8px !important;
-    border: 1px solid var(--border-gray) !important;
+/* Override any remaining dark mode styles */
+.dark, [data-theme="dark"] {
+    background: #ffffff !important;
+    color: #1f2937 !important;
 }
 
-.gr-textbox:focus {
-    border-color: var(--muted-blue) !important;
-    box-shadow: 0 0 0 3px rgba(74, 144, 164, 0.1) !important;
+/* Force all text elements to be visible */
+h1, h2, h3, h4, h5, h6, p, div, span, li, ol, ul {
+    color: #1f2937 !important;
+}
+
+/* Ensure HTML content is visible */
+.gr-html * {
+    color: #1f2937 !important;
+}
+
+/* Force visibility for all text content */
+* {
+    color: #1f2937 !important;
+}
+
+/* Override Gradio's default text colors */
+.gradio-container * {
+    color: #1f2937 !important;
+}
+
+/* AGGRESSIVE LABEL VISIBILITY - Override all Gradio label styles */
+.gr-label, .gr-label *, label, .label,
+.gradio-textbox label, .gradio-textarea label,
+[data-testid*="textbox"] label, [data-testid*="textarea"] label,
+.gr-textbox .gr-label, .gr-textarea .gr-label,
+.gr-textbox span[data-testid*="label"], .gr-textarea span[data-testid*="label"],
+.gr-textbox .label, .gr-textarea .label,
+.gr-form .gr-label, .gr-block .gr-label,
+.gradio-container .gr-label, .gradio-container label,
+.gr-textbox > span, .gr-textarea > span,
+.gr-textbox > div > span, .gr-textarea > div > span,
+.gr-textbox .svelte-*, .gr-textarea .svelte-*,
+span[class*="label"], div[class*="label"],
+.gr-textbox span:first-child, .gr-textarea span:first-child {
+    color: #1f2937 !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    margin-bottom: 0.5rem !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    background: transparent !important;
+}
+
+/* Target Gradio's internal label structure more aggressively */
+.gr-textbox > div:first-child, .gr-textarea > div:first-child,
+.gr-textbox > div:first-child > *, .gr-textarea > div:first-child > *,
+.gr-textbox .svelte-1gfkn6j, .gr-textarea .svelte-1gfkn6j,
+.gr-textbox .svelte-*, .gr-textarea .svelte-* {
+    color: #1f2937 !important;
+    font-weight: 600 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Force all possible label selectors */
+.gradio-container [class*="label"],
+.gradio-container [data-testid*="label"],
+.gradio-container .gr-textbox *:first-child,
+.gradio-container .gr-textarea *:first-child {
+    color: #1f2937 !important;
+    font-weight: 600 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Nuclear option - force ALL text in textbox containers to be visible */
+.gr-textbox *, .gr-textarea * {
+    color: #1f2937 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* NUCLEAR BACKGROUND OVERRIDE - Force all containers to be white */
+.gr-textbox, .gr-textarea, 
+.gr-textbox *, .gr-textarea *,
+.gr-textbox > div, .gr-textarea > div,
+.gr-textbox > div > div, .gr-textarea > div > div,
+.gr-textbox > div > div > div, .gr-textarea > div > div > div,
+[class*="textbox"], [class*="textarea"],
+[data-testid*="textbox"], [data-testid*="textarea"] {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+}
+
+/* Override any blue/dark backgrounds specifically */
+.gr-textbox [style*="background"], .gr-textarea [style*="background"],
+.gr-textbox [style*="background-color"], .gr-textarea [style*="background-color"] {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+}
+
+/* Force white background on any element with blue/dark styling */
+[style*="background: rgb("], [style*="background-color: rgb("],
+[style*="background:#"], [style*="background-color:#"] {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
 }
 """
 
 def format_results_html(result):
-    """Format the results into beautiful HTML with Swedish design."""
+    """Format the results into clean, professional HTML."""
     if not result:
         return "<div class='loading'>No results to display.</div>"
     
@@ -213,7 +303,7 @@ def format_results_html(result):
         <div class="results-container">
             <div class="additional-director">
                 <div class="section-title">🎬 AI Suggested Director</div>
-                <div style="font-size: 1.1rem; color: var(--charcoal);">
+                <div style="font-size: 1.1rem; color: #1f2937;">
                     <strong>{result.additional_director}</strong> - A perfect match for your vision!
                 </div>
             </div>
@@ -240,10 +330,10 @@ def format_results_html(result):
                 <div class="prompt-text">{director_cut.assemble_prompt()}</div>
                 
                 <details style="margin-top: 1rem;">
-                    <summary style="cursor: pointer; font-weight: 500; color: var(--muted-blue);">
+                    <summary style="cursor: pointer; font-weight: 500; color: #3b82f6;">
                         View Detailed Breakdown
                     </summary>
-                    <div style="margin-top: 1rem; padding: 1rem; background: var(--soft-gray); border-radius: 6px;">
+                    <div style="margin-top: 1rem; padding: 1rem; background: #f8fafc; border-radius: 6px; color: #1f2937;">
                         <div style="margin-bottom: 0.8rem;"><strong>Subject:</strong> {director_cut.subject_description}</div>
                         <div style="margin-bottom: 0.8rem;"><strong>Action:</strong> {director_cut.action_description}</div>
                         <div style="margin-bottom: 0.8rem;"><strong>Setting:</strong> {director_cut.setting_description}</div>
@@ -260,7 +350,7 @@ def format_results_html(result):
         html += f"""
             <div class="explanation-section">
                 <div class="section-title">🤔 Judge's Reasoning</div>
-                <div style="line-height: 1.8; color: var(--charcoal); font-size: 1rem;">
+                <div style="line-height: 1.8; color: #1f2937; font-size: 1rem;">
                     {result.director_ranks.explanation}
                 </div>
             </div>
@@ -272,7 +362,7 @@ def format_results_html(result):
     except Exception as e:
         return f"""
         <div class="results-container">
-            <div style="color: #e74c3c; padding: 1rem; background: #fdf2f2; border-radius: 8px;">
+            <div style="color: #dc2626; padding: 1rem; background: #fef2f2; border-radius: 8px;">
                 <strong>Error formatting results:</strong> {str(e)}
             </div>
         </div>
@@ -286,18 +376,18 @@ def run_director_bakeoff(video_idea, directors):
     try:
         # Initial loading message with expectations
         yield """
-        <div class='loading' style='background: var(--light-blue); padding: 2rem; border-radius: 12px; border-left: 4px solid var(--muted-blue);'>
-            <div style='font-size: 1.3rem; font-weight: 600; color: var(--charcoal); margin-bottom: 1rem;'>
+        <div class='loading' style='background: #f0f9ff; padding: 2rem; border-radius: 8px; border-left: 4px solid #3b82f6;'>
+            <div style='font-size: 1.3rem; font-weight: 600; color: #1f2937; margin-bottom: 1rem;'>
                 🎬 Director Bake-Off in Progress...
             </div>
-            <div style='font-size: 1rem; color: var(--muted-blue); margin-bottom: 1.5rem; line-height: 1.6;'>
+            <div style='font-size: 1rem; color: #6b7280; margin-bottom: 1.5rem; line-height: 1.6;'>
                 Please be patient, this may take some minutes...<br>
                 We're consulting with legendary directors to bring your vision to life!<br>
                 <strong>This process typically takes 30-60 seconds.</strong><br>
                 ✨
             </div>
-            <div style='background: var(--primary-white); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--accent-gold);'>
-                <div style='font-size: 0.9rem; color: var(--charcoal);'>
+            <div style='background: #ffffff; padding: 1rem; border-radius: 8px; border-left: 3px solid #f59e0b;'>
+                <div style='font-size: 0.9rem; color: #1f2937;'>
                     <strong>What's happening:</strong><br>
                     • Finding the perfect additional director for your concept<br>
                     • Generating unique interpretations from each director<br>
@@ -333,7 +423,14 @@ def run_director_bakeoff(video_idea, directors):
 
 # Create the Gradio interface
 def create_interface():
-    with gr.Blocks(css=SWEDISH_CSS, title="Director Bake-Off Studio") as interface:
+    # Force light mode theme
+    light_theme = gr.themes.Default(
+        primary_hue="blue",
+        secondary_hue="gray", 
+        neutral_hue="gray"
+    )
+    
+    with gr.Blocks(css=LIGHT_MODE_CSS, theme=light_theme, title="Director Bake-Off Studio") as interface:
         # Header
         gr.HTML("""
         <div class="main-header">
@@ -344,9 +441,9 @@ def create_interface():
         
         # How it Works section - moved to top
         gr.HTML("""
-        <div style="background: var(--light-blue); padding: 1.5rem; border-radius: 10px; margin-bottom: 2rem; border-left: 4px solid var(--muted-blue);">
-            <h3 style="margin-top: 0; color: var(--charcoal);">How it works:</h3>
-            <ol style="color: var(--charcoal); line-height: 1.6;">
+        <div style="background: #f0f9ff; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border-left: 4px solid #3b82f6;">
+            <h3 style="margin-top: 0; color: #1f2937;">How it works:</h3>
+            <ol style="color: #1f2937; line-height: 1.6;">
                 <li>Enter your video idea in the text area below</li>
                 <li>List your favorite directors (or use our defaults)</li>
                 <li>Our AI will suggest an additional director perfect for your vision</li>
@@ -402,7 +499,7 @@ def create_interface():
         
         # Footer
         gr.HTML("""
-        <div style="text-align: center; padding: 2rem; color: var(--muted-blue); font-size: 0.9rem;">
+        <div style="text-align: center; padding: 2rem; color: #6b7280; font-size: 0.9rem;">
             <p>Powered by DSPy and the creative genius of legendary directors 🎬</p>
         </div>
         """)
